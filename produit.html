@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+   <meta charset="UTF-8">
+    <!-- NOUVEAU: Méta-tags Open Graph pour un partage enrichi -->
+    <meta property="og:title" content="Découvrez ce cours sur Junior-Senior Gap Killer">
+    <meta property="og:description" content="Comblez le fossé générationnel. Apprenez des meilleurs.">
+    <meta property="og:image" content="https://i.postimg.cc/D0b7ZxQc/Logo-for-Training-Platform-Dynamic-Emblem.png">
+    <meta property="og:url" content="https://junior-senior-gaps-killer.vercel.app/">
+    <meta property="og:site_name" content="J-S Gap Killer">
+    <meta property="og:type" content="website">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détail du Cours - Junior Senior Gaps Killer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NOUVEAU: Ajout de la bibliothèque d'icônes pour la nouvelle navigation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+
+         :root {
+            --gold-color: #FF7F00; /* Orange Vif / Énergique */
+            --dark-color: #1A233A; /* Bleu Nuit / Marine Foncé */
+        }
+        .text-gold { color: var(--gold-color); }
+        .bg-gold { background-color: var(--gold-color); }
+        .text-main-on-light { color: #333333; }
+        .border-gold { border-color: var(--gold-color); }
+
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+        body {
+            padding-bottom: 100px; /* Espace pour la nav mobile + marge */ 
+            overflow-x: hidden; /* GARANTIT qu'aucun élément ne peut déborder horizontalement */
+        } 
+        @media (min-width: 768px) {
+
+            body { padding-bottom: 0; }
+            .mobile-nav { display: none; }
+        }
+        .variant-btn { transition: all 0.2s ease; }
+        .variant-btn.selected { border-color: var(--gold-color); background-color: #fefce8; }
+        /* NOUVEAU: Styles pour le zoom interne */
+
+        #image-zoom-wrapper { cursor: crosshair; }
+        #image-zoom-wrapper > img {
+            transition: transform 0.2s ease-out;
+        }
+        /* NOUVEAU: Style pour la barre de recherche "luxueuse" */
+        .lux-search-input {
+            background: linear-gradient(to right, #f3f4f6, #e5e7eb);
+            border: 1px solid transparent;
+        }
+        /* NOUVEAU: Style pour la barre d'icônes flottante */
+        .floating-icon-bar {
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: opacity 0.3s ease-in-out;
+        }
+        .floating-icon-bar:hover {
+            opacity: 1 !important; /* Garder l'opacité au survol */
+        }
+        .dropdown:hover .dropdown-menu { display: block; }
+        .dropdown-menu { display: none; }
+    </style>
+</head>
+<body class="font-montserrat" style="background-color: #F5F5F5;">
+
+    <!-- NOUVEAU: Conteneur sticky pour l'en-tête et la navigation -->
+    <div class="sticky top-0 z-40 bg-white shadow-md">
+        <!-- Header -->
+        <header>
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex items-center justify-between">
+                    <!-- Logo -->
+                    <a href="index.html" class="flex items-center">
+                        <img src="https://i.postimg.cc/D0b7ZxQc/Logo-for-Training-Platform-Dynamic-Emblem.png" alt="Junior Senior Gaps Killer Logo" class="h-10">
+                    </a>
+
+                    <!-- Barre de recherche -->
+                    <form id="search-form-header" class="mx-4 md:w-1/3" onsubmit="initializeSearch()">
+                        <div class="relative">
+                            <input type="search" placeholder="Que voulez-vous apprendre aujourd'hui ?" class="w-full p-3 pl-10 pr-4 text-sm text-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-gold lux-search-input transition-all duration-300 ease-in-out">
+                            <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gold">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- NOUVEAU: Liens de navigation dans l'en-tête -->
+                    <div class="hidden md:flex items-center space-x-6 text-sm font-semibold text-gray-700">
+                        <a href="index.html#about-us" class="hover:text-gold transition-colors">À Propos</a>
+                        <a href="methodologie.html" class="hover:text-gold transition-colors">Notre Méthode</a>
+                        <a href="blog.html" class="hover:text-gold transition-colors">Blog</a>
+                        <a href="senior-auth.html" class="hover:text-gold transition-colors">Devenir Formateur</a>
+                        <a href="promotions.html" class="text-red-500 hover:text-red-700 font-bold">SuperDeals</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <!-- Contenu de la page produit -->
+    <main class="w-full max-w-7xl mx-auto px-4 py-12 text-main-on-light">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+            <!-- Galerie d'images -->
+
+            <div id="product-gallery">
+                <!-- NOUVEAU: Lecteur vidéo pour l'aperçu -->
+                <div id="video-preview-container" class="relative w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg mb-4">
+                    <div id="video-skeleton" class="w-full h-full bg-gray-200 animate-pulse"></div>
+                    <iframe id="course-video-player" class="absolute top-0 left-0 w-full h-full hidden" src="" title="Aperçu du cours" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <!-- NOUVEAU: Bannière rouge pour le mode freemium -->
+                    <div id="freemium-banner" class="absolute top-2 left-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-semibold hidden animate-pulse"></div>
+                    <!-- NOUVEAU: Superposition à la fin de l'aperçu -->
+                    <div id="freemium-overlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-center text-white p-8 hidden">
+                        <h3 class="text-2xl font-bold mb-4">Aperçu gratuit terminé</h3>
+                        <p class="mb-6">Veuillez confirmer votre achat pour débloquer ce cours et toutes les autres vidéos.</p>
+                        <button id="overlay-buy-button" class="bg-gold text-white px-8 py-3 rounded-lg font-semibold hover:bg-orange-600 transition text-lg">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations produit -->
+            <div>
+                <!-- Titre et résumé -->
+                <h1 id="course-title" class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-3"></h1>
+                <p id="course-summary" class="text-lg text-gray-600 mb-6"></p>
+
+                <!-- Tags du cours -->
+                <div id="course-tags-container" class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-700 mb-6">
+                    <!-- Les tags (durée, niveau, etc.) seront injectés ici -->
+                </div>
+
+                <!-- Prix -->
+                <div id="course-price-container" class="flex items-baseline space-x-3 mb-6">
+                    <!-- Le prix sera injecté ici par JS -->
+                </div>
+
+                <!-- Boutons d'action -->
+                <div id="action-buttons-container" class="mt-6 space-y-3">
+                    <button id="buy-course-button" class="w-full bg-gold text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition text-lg">
+                        Acheter ce cours
+                    </button>
+                    <button id="wishlist-button" class="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-100 transition text-lg">
+                        Ajouter à la liste de souhaits
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Détails complets du cours -->
+        <div class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Colonne principale (gauche) -->
+            <div class="lg:col-span-2 space-y-12">
+                <!-- Objectifs -->
+                <section id="course-objectives-section">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Ce que vous allez apprendre</h2>
+                    <ul id="course-objectives-list" class="space-y-2 list-disc list-inside text-gray-700"></ul>
+                </section>
+
+                <!-- Structure du cours -->
+                <section id="course-structure-section">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Contenu du cours</h2>
+                    <div id="course-structure-container" class="space-y-2"></div>
+                </section>
+
+                <!-- Avis -->
+                <section id="course-reviews-section">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Avis des participants</h2>
+                    <div id="course-reviews-container"></div>
+                </section>
+            </div>
+
+            <!-- Colonne latérale (droite) -->
+            <aside class="lg:col-span-1 space-y-8">
+                <!-- Profil du formateur -->
+                <section id="instructor-profile-section" class="bg-white p-6 rounded-lg shadow-md border">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Votre Formateur</h2>
+                    <div id="instructor-profile-container" class="flex items-center space-x-4"></div>
+                    <p id="instructor-bio" class="text-sm text-gray-600 mt-4"></p>
+                </section>
+
+                <!-- Avantage Senior Gap Killer -->
+                <section id="senior-advantage-section" class="bg-gold/10 p-6 rounded-lg border border-gold/30">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">⚡ Avantage Senior Gap Killer</h2>
+                    <p id="senior-advantage-text" class="text-gray-700"></p>
+                </section>
+
+                <!-- Prérequis et public cible -->
+                <section id="requirements-section" class="bg-white p-6 rounded-lg shadow-md border">
+                    <div id="prerequisites-container">
+                        <h3 class="font-semibold mb-2">Prérequis</h3>
+                        <ul id="prerequisites-list" class="list-disc list-inside text-sm text-gray-600"></ul>
+                    </div>
+                    <div id="target-audience-container" class="mt-4">
+                        <h3 class="font-semibold mb-2">Pour qui est ce cours ?</h3>
+                        <p id="target-audience-text" class="text-sm text-gray-600"></p>
+                    </div>
+                </section>
+            </aside>
+        </div>
+
+        <!-- Section Cours similaires -->
+        <section class="mt-16 border-t pt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-8">Autres cours qui pourraient vous plaire</h2>
+            <div id="similar-courses-container" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <!-- Les cours similaires seront injectés ici par JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-white pt-12 pb-8" style="background-color: #1A233A;">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Junior Senior Gaps Killer</h4><p class="text-gray-400 text-sm">Accélérateur de compétences. Révélateur de shortcuts.</p></div>
+                <div><h4 class="font-bold text-lg mb-4">Navigation</h4><ul class="space-y-2 text-sm"><li><a href="index.html" class="text-gray-400 hover:text-white">Accueil</a></li><li><a href="promotions.html" class="text-gray-400 hover:text-white">Tous les cours</a></li><li><a href="compte.html" class="text-gray-400 hover:text-white">Mon Compte</a></li></ul></div>
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Aide & Contact</h4><ul class="space-y-2 text-sm"><li><a href="politique-confidentialite.html" class="text-gray-400 hover:text-white">Politique de confidentialité</a></li></ul></div>
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Suivez-nous</h4><div class="flex space-x-4"><a href="#" class="text-gray-400 hover:text-white">FB</a><a href="#" class="text-gray-400 hover:text-white">IG</a></div></div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500 text-sm"><p>&copy; 2024 Junior Senior Gaps Killer. Tous droits réservés.</p></div>
+        </div>
+    </footer>
+
+    <!-- NOUVEAU: Barre d'icônes verticale flottante pour ordinateur -->
+    <div class="hidden md:block fixed z-50 floating-icon-bar opacity-90">
+        <div class="bg-gray-900/80 backdrop-blur-sm text-white rounded-lg shadow-lg px-3 py-4 flex flex-col items-center space-y-6">
+            <a href="https://wa.me/221769047999" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" title="Aide & Support">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9Z"></path><path d="M10.29 21.71c.4.2.83.3 1.21.3s.81-.1 1.21-.3"></path><path d="M12 13a1 1 0 0 1 1-1h.01a1 1 0 0 1 0 2H13a1 1 0 0 1-1-1Z" fill="currentColor"></path></svg>
+            </a>
+            <a href="suivi-commande.html" class="text-gray-400 hover:text-white transition-colors" title="Historique"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></a>
+            <a href="notification.html" class="text-gray-400 hover:text-white transition-colors" title="Notifications"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a1 1 0 00-2 0v.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></a>
+            <a href="panier.html" class="text-gray-400 hover:text-white transition-colors relative" title="Panier">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+            </a>
+            <a href="authentification.html" class="text-gray-400 hover:text-white transition-colors" title="Mon Compte"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></a>
+        </div>
+    </div>
+
+    <!-- Barre de navigation inférieure -->
+    <nav class="mobile-nav border-t-2 border-gray-200 fixed bottom-0 left-0 right-0 z-40" style="background-color: #FF7F00;">
+        <div class="w-full overflow-x-auto whitespace-nowrap">
+            <div class="relative flex justify-around items-center h-16 min-w-max px-4">
+                <a href="index.html" class="flex flex-col items-center text-white hover:text-blue-900 transition">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                    <span class="text-xs font-semibold">Accueil</span>
+                </a>
+                <a href="suivi-commande.html" class="flex flex-col items-center text-white hover:text-blue-900 transition">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <span class="text-xs">Suivi</span>
+                </a>
+                <div class="w-16"></div> <!-- Espace réservé -->
+                <a href="compte.html" class="flex flex-col items-center text-white hover:text-blue-900 transition">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="text-xs">Compte</span>
+                </a>
+                <a href="panier.html" class="flex flex-col items-center text-white hover:text-blue-900 transition relative">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <span class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    <span class="text-xs">Panier</span>
+                </a>
+                <a id="whatsapp-float-btn" href="https://wa.me/221769047999" target="_blank" rel="noopener noreferrer" class="absolute left-1/2 -translate-x-1/2 -top-8 bg-gold w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white hover:bg-orange-600 transition transform hover:scale-110">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.487 5.235 3.487 8.413 0 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.452L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.655 4.398 1.849 6.22l-1.072 3.912 3.912-1.072z"/></svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <script src="js/main.js"></script>
+
+</body>
+</html>

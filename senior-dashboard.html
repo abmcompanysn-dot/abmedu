@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Senior</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --gold-color: #FF7F00; /* Orange Vif / Énergique */
+            --dark-color: #1A233A; /* Bleu Nuit / Marine Foncé */
+        }
+        .text-gold { color: var(--gold-color); }
+        .bg-gold { background-color: var(--gold-color); }
+        .text-main-on-light { color: #333333; }
+        .border-gold { border-color: var(--gold-color); }
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+        /* NOUVEAU: Style pour l'onglet actif du tableau de bord */
+        .dashboard-tab.active {
+            background-color: #FFF7ED; /* orange-100 */
+            color: #92400E; /* yellow-800 */
+        }
+    </style>
+</head>
+<body class="font-montserrat" style="background-color: #F5F5F5;">
+
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center">
+                <img src="https://i.postimg.cc/D0b7ZxQc/Logo-for-Training-Platform-Dynamic-Emblem.png" alt="Logo" class="h-10">
+            </a>
+            <div class="flex items-center space-x-4">
+                <span id="user-name-display" class="font-semibold"></span>
+                <button id="logout-button" class="text-sm font-semibold text-red-600 hover:underline">Déconnexion</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12 text-main-on-light">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Tableau de Bord Senior</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Menu de navigation -->
+            <aside class="md:col-span-1">
+                <nav class="bg-white p-4 rounded-lg shadow space-y-2">
+                    <a href="#" onclick="switchDashboardTab('stats')" id="tab-stats" class="dashboard-tab flex items-center space-x-3 p-3 rounded-lg font-semibold"><span>Statistiques</span></a>
+                    <a href="#" onclick="switchDashboardTab('courses')" id="tab-courses" class="dashboard-tab flex items-center space-x-3 p-3 rounded-lg font-semibold"><span>Gestion des Cours</span></a>
+                    <a href="#" onclick="switchDashboardTab('qa')" id="tab-qa" class="dashboard-tab flex items-center space-x-3 p-3 rounded-lg font-semibold"><span>Questions & Réponses</span></a>
+                    <a href="#" onclick="switchDashboardTab('revenue')" id="tab-revenue" class="dashboard-tab flex items-center space-x-3 p-3 rounded-lg font-semibold"><span>Revenus</span></a>
+                    <a href="#" onclick="switchDashboardTab('profile')" id="tab-profile" class="dashboard-tab flex items-center space-x-3 p-3 rounded-lg font-semibold"><span>Mon Profil</span></a>
+                </nav>
+            </aside>
+
+            <!-- Contenu principal -->
+            <div class="md:col-span-2">
+                <!-- Section Statistiques (F-FOR-02) -->
+                <div id="content-stats" class="dashboard-content bg-white p-8 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-6">Vos Statistiques</h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p id="stats-courses" class="text-3xl font-bold text-blue-800">...</p>
+                            <p class="text-sm text-blue-600">Cours déployés</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <p id="stats-students" class="text-3xl font-bold text-green-800">...</p>
+                            <p class="text-sm text-green-600">Apprenants inscrits</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <p id="stats-revenue" class="text-3xl font-bold text-orange-800">...</p>
+                            <p class="text-sm text-orange-600">Revenu total</p>
+                        </div>
+                    </div>
+
+                    <!-- Cours les plus populaires -->
+                    <div class="mt-8 border-t pt-6">
+                        <h4 class="text-lg font-semibold mb-4">Vos cours les plus populaires</h4>
+                        <p class="text-gray-500 text-sm">Cette section affichera vos cours les plus vendus.</p>
+                    </div>
+                </div>
+
+                <!-- Section Gestion des Cours -->
+                <div id="content-courses" class="dashboard-content bg-white p-8 rounded-lg shadow hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">Gestion des Cours</h3>
+                        <button id="add-course-btn" class="bg-gold text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition">
+                            + Créer un cours
+                        </button>
+                    </div>
+                    <div id="courses-list">
+                        <!-- La liste des cours du Senior sera injectée ici -->
+                        <p class="text-gray-500">Vous n'avez pas encore créé de cours.</p>
+                    </div>
+                </div>
+
+                <!-- Section Questions & Réponses (F-FOR-05) -->
+                <div id="content-qa" class="dashboard-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Questions des Apprenants</h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-gray-50 rounded-md">
+                            <p class="text-sm">"Comment gérer le versioning d'API dans un contexte microservice ?" - par <strong>Alioune S.</strong></p>
+                            <a href="#" class="text-sm text-blue-600 font-semibold">Répondre</a>
+                        </div>
+                        <p class="text-gray-500 text-sm">Vous avez répondu à toutes les questions. Excellent travail !</p>
+                    </div>
+                </div>
+
+                <!-- Section Revenus (F-FOR-04) -->
+                <div id="content-revenue" class="dashboard-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Suivi des Revenus</h3>
+                    <p>Cette section affichera le détail de vos ventes, vos revenus et l'historique de vos paiements.</p>
+                </div>
+
+                <!-- Section Profil (F-FOR-07) -->
+                <div id="content-profile" class="dashboard-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Modifier mon Profil Public</h3>
+                    <form id="profile-update-form" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Titre (ex: CTO, Développeur Senior)</label>
+                            <input type="text" id="profile-title-input" class="mt-1 block w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Biographie</label>
+                            <textarea id="profile-bio-input" rows="4" class="mt-1 block w-full p-2 border rounded-md"></textarea>
+                        </div>
+                        <button type="submit" class="px-4 py-2 bg-gold text-white rounded-lg font-bold">Enregistrer les modifications</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- NOUVEAU: Modale pour AJOUTER un cours -->
+    <div id="add-course-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 max-h-screen overflow-y-auto">
+            <h3 class="text-xl font-bold mb-4">Créer un nouveau cours</h3>
+            <form id="add-course-form" class="space-y-4">
+                <div>
+                    <label for="course-category-select" class="block text-sm font-medium text-gray-700">Catégorie du cours</label>
+                    <select id="course-category-select" class="mt-1 block w-full p-2 border rounded-md" required>
+                        <option value="">Chargement...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="course-name-input" class="block text-sm font-medium text-gray-700">Nom du cours</label>
+                    <input type="text" id="course-name-input" class="mt-1 block w-full p-2 border rounded-md" required>
+                </div>
+                <div>
+                    <label for="course-summary-input" class="block text-sm font-medium text-gray-700">Résumé</label>
+                    <textarea id="course-summary-input" rows="3" class="mt-1 block w-full p-2 border rounded-md" required></textarea>
+                </div>
+                <div>
+                    <label for="course-price-input" class="block text-sm font-medium text-gray-700">Prix (F CFA)</label>
+                    <input type="number" id="course-price-input" class="mt-1 block w-full p-2 border rounded-md" required>
+                </div>
+                <div>
+                    <label for="course-level-input" class="block text-sm font-medium text-gray-700">Niveau requis</label>
+                    <select id="course-level-input" class="mt-1 block w-full p-2 border rounded-md" required>
+                        <option value="Débutant">Débutant</option>
+                        <option value="Intermédiaire">Intermédiaire</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="course-video-intro-input" class="block text-sm font-medium text-gray-700">URL de la vidéo d'introduction (YouTube Embed)</label>
+                    <input type="url" id="course-video-intro-input" class="mt-1 block w-full p-2 border rounded-md" placeholder="https://www.youtube.com/embed/xxxxxx" required>
+                </div>
+                <div>
+                    <label for="course-objectives-input" class="block text-sm font-medium text-gray-700">Objectifs du cours (séparés par un point-virgule ";")</label>
+                    <textarea id="course-objectives-input" rows="3" class="mt-1 block w-full p-2 border rounded-md" placeholder="Objectif 1; Objectif 2; Objectif 3" required></textarea>
+                </div>
+                <div>
+                    <label for="course-prerequisites-input" class="block text-sm font-medium text-gray-700">Prérequis (séparés par un point-virgule ";")</label>
+                    <textarea id="course-prerequisites-input" rows="2" class="mt-1 block w-full p-2 border rounded-md" placeholder="Prérequis 1; Prérequis 2" required></textarea>
+                </div>
+                <div>
+                    <label for="course-target-audience-input" class="block text-sm font-medium text-gray-700">Public Cible</label>
+                    <input type="text" id="course-target-audience-input" class="mt-1 block w-full p-2 border rounded-md" placeholder="Ex: Développeurs Backend avec 3+ ans d'expérience" required>
+                </div>
+                <div>
+                    <label for="course-duration-input" class="block text-sm font-medium text-gray-700">Durée du cours (ex: 8h 30min)</label>
+                    <input type="text" id="course-duration-input" class="mt-1 block w-full p-2 border rounded-md" placeholder="ex: 10h 45min" required>
+                </div>
+                <div>
+                    <label for="course-cover-input" class="block text-sm font-medium text-gray-700">Image de couverture</label>
+                    <input type="file" id="course-cover-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="document.getElementById('add-course-modal').classList.add('hidden')" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">Annuler</button>
+                    <button type="submit" class="bg-gold text-white px-4 py-2 rounded-lg font-bold">Créer le cours</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOUVEAU: Modale pour ajouter/modifier un cours -->
+    <div id="edit-course-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h3 id="modal-title" class="text-xl font-bold mb-4">Créer un nouveau cours</h3>
+            <form id="edit-course-form" class="space-y-4">
+                <input type="hidden" id="edit-course-id">
+                <div>
+                    <label for="edit-course-name" class="block text-sm font-medium text-gray-700">Nom du cours</label>
+                    <input type="text" id="edit-course-name" class="mt-1 block w-full p-2 border rounded-md" required>
+                </div>
+                <div>
+                    <label for="edit-course-summary" class="block text-sm font-medium text-gray-700">Résumé</label>
+                    <textarea id="edit-course-summary" rows="3" class="mt-1 block w-full p-2 border rounded-md" required></textarea>
+                </div>
+                <div>
+                    <label for="edit-course-price" class="block text-sm font-medium text-gray-700">Prix (F CFA)</label>
+                    <input type="number" id="edit-course-price" class="mt-1 block w-full p-2 border rounded-md" required>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditCourseModal()" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">Annuler</button>
+                    <button type="submit" class="bg-gold text-white px-4 py-2 rounded-lg font-bold">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOUVEAU: Modale pour répondre à une question -->
+    <div id="reply-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h3 class="text-xl font-bold mb-4">Répondre à la question</h3>
+            <div class="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
+                <p id="modal-question-details" class="text-xs text-gray-500 mb-1"></p>
+                <p id="modal-question-text" class="italic">"</p>
+            </div>
+            <form id="reply-form">
+                <input type="hidden" id="modal-question-id">
+                <div>
+                    <label for="modal-reply-textarea" class="block text-sm font-medium text-gray-700">Votre réponse</label>
+                    <textarea id="modal-reply-textarea" rows="5" class="mt-1 block w-full p-2 border rounded-md" required></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 mt-4">
+                    <button type="button" onclick="closeReplyModal()" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">Annuler</button>
+                    <button type="submit" class="bg-gold text-white px-4 py-2 rounded-lg font-bold">Envoyer la réponse</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-white pt-12 pb-8 mt-16" style="background-color: #1A233A;">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Junior Senior Gaps Killer</h4><p class="text-gray-400 text-sm">Accélérateur de compétences. Révélateur de shortcuts.</p></div>
+                <div><h4 class="font-bold text-lg mb-4">Navigation</h4><ul class="space-y-2 text-sm"><li><a href="index.html" class="text-gray-400 hover:text-white">Accueil</a></li><li><a href="promotions.html" class="text-gray-400 hover:text-white">Tous les cours</a></li><li><a href="compte.html" class="text-gray-400 hover:text-white">Mon Compte</a></li></ul></div>
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Aide & Contact</h4><ul class="space-y-2 text-sm"><li><a href="politique-confidentialite.html" class="text-gray-400 hover:text-white">Politique de confidentialité</a></li></ul></div>
+                <div><h4 class="font-bold text-lg mb-4 text-gold">Suivez-nous</h4><div class="flex space-x-4"><a href="#" class="text-gray-400 hover:text-white">FB</a><a href="#" class="text-gray-400 hover:text-white">IG</a></div></div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500 text-sm"><p>&copy; 2024 Junior Senior Gaps Killer. Tous droits réservés.</p></div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('abmcyUser'));
+            if (!user || user.Role !== 'Senior') {
+                window.location.href = 'senior-auth.html';
+                return;
+            }
+            document.getElementById('user-name-display').textContent = user.Nom;
+            document.getElementById('logout-button').addEventListener('click', () => {
+                localStorage.removeItem('abmcyUser');
+                window.location.href = 'index.html';
+            });
+
+            // Logique des onglets du tableau de bord
+            switchDashboardTab('stats'); // Afficher le premier onglet par défaut
+            loadSeniorDashboard(); // NOUVEAU: Charger les statistiques
+
+            // NOUVEAU: Charger les données spécifiques au profil et aux cours
+            initializeProfileForm(user);
+            loadSeniorCourses();
+            loadSeniorQA();
+            document.getElementById('profile-update-form').addEventListener('submit', handleProfileUpdate);
+
+            // NOUVEAU: Gérer l'ouverture des modales
+            document.getElementById('add-course-btn').addEventListener('click', () => {
+                document.getElementById('add-course-modal').classList.remove('hidden');
+                populateCourseCategorySelect(); // Remplit le sélecteur de catégories
+            });
+
+            // NOUVEAU: Gérer la soumission du formulaire de réponse
+            document.getElementById('reply-form').addEventListener('submit', handleReplySubmit);
+            // NOUVEAU: Gérer la soumission du formulaire de création de cours
+            document.getElementById('add-course-form').addEventListener('submit', handleAddCourseSubmit);
+        });
+
+        function switchDashboardTab(tabId) {
+            // Cacher tous les contenus
+            document.querySelectorAll('.dashboard-content').forEach(el => el.classList.add('hidden'));
+            // Retirer le style actif de tous les onglets
+            document.querySelectorAll('.dashboard-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Afficher le contenu et activer l'onglet sélectionné
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+    </script>
+</body>
+</html>
