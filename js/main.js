@@ -19,6 +19,11 @@ let allLoadedProducts = []; // Stocke tous les produits déjà chargés
 let renderedCategoriesCount = 0;
 const CATEGORIES_PER_LOAD = 3;
 
+// NOUVEAU: Variables globales pour la pagination
+let promotionProducts = []; // Stocke tous les produits en promotion après filtrage
+let currentPage = 1;
+const ITEMS_PER_PAGE = 12;
+
 let DELIVERY_OPTIONS = {}; // NOUVEAU: Sera chargé depuis l'API
 
 // Attendre que le contenu de la page soit entièrement chargé
@@ -68,6 +73,10 @@ async function initializeApp() {
     // NOUVEAU: Initialiser la page d'historique
     if (window.location.pathname.endsWith('suivi-commande.html')) {
         initializeHistoryPage();
+    }
+    // NOUVEAU: Initialiser la page des favoris
+    if (window.location.pathname.endsWith('favoris.html')) {
+        initializeFavoritesPage();
     }
 
     if (document.getElementById('countdown')) {
@@ -689,11 +698,11 @@ function applyPromotionFilters(catalog) {
     const levelValue = document.getElementById('filter-level').value;
 
     const allProducts = catalog.data.products || [];
-    let filteredProducts = allProducts.filter(p => p['Réduction%'] && parseFloat(p['Réduction%']) > 0);
+    let localFilteredProducts = allProducts.filter(p => p['Réduction%'] && parseFloat(p['Réduction%']) > 0);
 
     // 1. Filtrer par niveau
     if (levelValue !== 'all') {
-        filteredProducts = filteredProducts.filter(p => p.Niveau === levelValue);
+        localFilteredProducts = localFilteredProducts.filter(p => p.Niveau === levelValue);
     }
 
     // 2. Trier
@@ -712,17 +721,12 @@ function applyPromotionFilters(catalog) {
             });
             break;
     }
-
-    // 3. Afficher les résultats
-    resultsCount.textContent = `${filteredProducts.length} produit(s) trouvé(s).`;
-    if (filteredProducts.length === 0) {
-        resultsContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Aucun produit ne correspond à vos critères.</p>`;
-    } else {
-        resultsContainer.innerHTML = filteredProducts.map(product => renderProductCard(product)).join('');
-    }
-
-    // NOUVEAU: Ré-attacher les états de "like" après le re-rendu
-    updateAllLikeButtonsState();
+    
+    // 3. Mettre à jour la liste globale et réinitialiser la pagination
+    promotionProducts = localFilteredProducts;
+    currentPage = 1;
+    resultsCount.textContent = `${promotionProducts.length} produit(s) trouvé(s).`;
+    renderPaginatedPromotions();
 }
 
 
@@ -739,17 +743,13 @@ function displayPromotionProducts(catalog) {
         const { data } = catalog;
         const allProducts = data.products || [];
         // Filtrer les produits qui ont une réduction
-        const discountedProducts = allProducts.filter(product => product['Réduction%'] && parseFloat(product['Réduction%']) > 0);
+        promotionProducts = allProducts.filter(product => product['Réduction%'] && parseFloat(product['Réduction%']) > 0);
 
-        resultsCount.textContent = `${discountedProducts.length} produit(s) en promotion.`;
+        resultsCount.textContent = `${promotionProducts.length} produit(s) en promotion.`;
 
-        if (discountedProducts.length === 0) {
-            resultsContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Aucun produit en promotion pour le moment.</p>`;
-            return;
-        }
-
-        const resultsHTML = discountedProducts.map(product => renderProductCard(product)).join('');
-        resultsContainer.innerHTML = resultsHTML;
+        // Afficher la première page
+        currentPage = 1;
+        renderPaginatedPromotions();
 
         // NOUVEAU: Attacher l'événement au bouton de filtre
         document.getElementById('apply-filters-btn').addEventListener('click', () => {
@@ -761,6 +761,77 @@ function displayPromotionProducts(catalog) {
         resultsCount.textContent = `Erreur lors du chargement des promotions.`;
         resultsContainer.innerHTML = `<p class="col-span-full text-center text-red-500">Impossible de charger les promotions.</p>`;
     }
+}
+
+/**
+ * NOUVEAU: Affiche les produits de la page actuelle et met à jour la pagination.
+ */
+function renderPaginatedPromotions() {
+    const resultsContainer = document.getElementById('promotion-results-container');
+    const paginationContainer = document.getElementById('pagination-container');
+    if (!resultsContainer || !paginationContainer) return;
+
+    if (promotionProducts.length === 0) {
+        resultsContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Aucun produit ne correspond à vos critères.</p>`;
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    const totalPages = Math.ceil(promotionProducts.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedItems = promotionProducts.slice(startIndex, endIndex);
+
+    resultsContainer.innerHTML = paginatedItems.map(product => renderProductCard(product)).join('');
+    renderPagination(totalPages, currentPage);
+    
+    // Mettre à jour l'état des boutons "like" après le rendu
+    updateAllLikeButtonsState();
+}
+
+/**
+ * NOUVEAU: Génère et affiche les contrôles de pagination.
+ * @param {number} totalPages - Le nombre total de pages.
+ * @param {number} currentPage - La page actuellement affichée.
+ */
+function renderPagination(totalPages, currentPage) {
+    const paginationContainer = document.getElementById('pagination-container');
+    if (totalPages <= 1) {
+        paginationContainer.innerHTML = '';
+        return;
+    }
+
+    let paginationHTML = '';
+
+    // Bouton Précédent
+    paginationHTML += `<button onclick="changePromotionPage(${currentPage - 1})" class="px-4 py-2 bg-white border rounded-md text-sm font-medium ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}" ${currentPage === 1 ? 'disabled' : ''}>Précédent</button>`;
+
+    // Numéros de page
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === currentPage) {
+            paginationHTML += `<span class="px-4 py-2 bg-gold border border-gold text-white rounded-md text-sm font-medium">${i}</span>`;
+        } else {
+            paginationHTML += `<button onclick="changePromotionPage(${i})" class="px-4 py-2 bg-white border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">${i}</button>`;
+        }
+    }
+
+    // Bouton Suivant
+    paginationHTML += `<button onclick="changePromotionPage(${currentPage + 1})" class="px-4 py-2 bg-white border rounded-md text-sm font-medium ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-50'}" ${currentPage === totalPages ? 'disabled' : ''}>Suivant</button>`;
+
+    paginationContainer.innerHTML = paginationHTML;
+}
+
+/**
+ * NOUVEAU: Change la page affichée pour les promotions.
+ * @param {number} pageNumber - Le numéro de la page à afficher.
+ */
+function changePromotionPage(pageNumber) {
+    const totalPages = Math.ceil(promotionProducts.length / ITEMS_PER_PAGE);
+    if (pageNumber < 1 || pageNumber > totalPages) return;
+
+    currentPage = pageNumber;
+    renderPaginatedPromotions();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Remonter en haut de la page
 }
 
 /**
@@ -1778,6 +1849,54 @@ function toggleLike(event, button, courseId) {
     icon.className = `fa-heart ${isLiked ? 'far' : 'fas'}`; // Mettre à jour l'icône
 }
 
+/**
+ * NOUVEAU: Met à jour l'état de tous les boutons "like" sur la page.
+ */
+function updateAllLikeButtonsState() {
+    const likedCourses = getLikedCourses();
+    document.querySelectorAll('.like-btn').forEach(button => {
+        const courseId = button.dataset.courseId;
+        const icon = button.querySelector('i');
+        if (likedCourses.includes(courseId)) {
+            button.classList.add('liked');
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        } else {
+            button.classList.remove('liked');
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        }
+    });
+}
+
+/**
+ * NOUVEAU: Initialise la page des favoris.
+ */
+async function initializeFavoritesPage() {
+    const container = document.getElementById('favorites-container');
+    if (!container) return;
+
+    const likedCourseIds = getLikedCourses();
+
+    if (likedCourseIds.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-12">Vous n'avez pas encore de cours favoris. Cliquez sur le cœur d'un cours pour l'ajouter ici !</p>`;
+        return;
+    }
+
+    // Afficher un squelette de chargement
+    const skeletonCard = `<div class="bg-white rounded-lg shadow overflow-hidden animate-pulse"><div class="bg-gray-200 h-40"></div><div class="p-3 space-y-2"><div class="bg-gray-200 h-4 rounded"></div><div class="bg-gray-200 h-6 w-1/2 rounded"></div></div></div>`;
+    container.innerHTML = Array(likedCourseIds.length).fill(skeletonCard).join('');
+
+    try {
+        const catalog = await getCatalogAndRefreshInBackground();
+        const allCourses = catalog.data.products || [];
+        const favoriteCourses = allCourses.filter(course => likedCourseIds.includes(course.ID_Cours || course.IDProduit));
+        container.innerHTML = favoriteCourses.map(course => renderProductCard(course)).join('');
+    } catch (error) {
+        console.error("Erreur lors du chargement des favoris:", error);
+        container.innerHTML = `<p class="col-span-full text-center text-red-500">Impossible de charger vos favoris.</p>`;
+    }
+}
 /**
  * NOUVEAU: Récupère les cours "likés" depuis le localStorage.
  * @returns {string[]} Un tableau d'ID de cours.
