@@ -261,6 +261,68 @@
             </div>
         </section>
 
+        <!-- NOUVEAU: Section Success Stories (Carrousel) -->
+        <section class="my-16">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">Ils ont lancé leur business pendant leurs études</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 text-center mb-12">Inspiré par notre devise "un pied à l'école, un pied dans le business", ils ont transformé leurs compétences en revenus.</p>
+            
+            <div class="relative">
+                <!-- Conteneur du Carrousel -->
+                <div id="success-carousel" class="promo-carousel flex overflow-x-auto snap-x-mandatory">
+                    <!-- Les diapositives seront injectées ici par JavaScript -->
+                </div>
+
+                <!-- Points de navigation -->
+                <div id="success-carousel-dots" class="carousel-dots absolute left-1/2 -translate-x-1/2 flex space-x-2">
+                    <!-- Les points seront injectés ici -->
+                </div>
+
+                <!-- Boutons de navigation (optionnel, pour desktop) -->
+                <button onclick="scrollCarousel('success-carousel', -1)" class="absolute top-1/2 left-0 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-2 hidden md:block">
+                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button onclick="scrollCarousel('success-carousel', 1)" class="absolute top-1/2 right-0 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-2 hidden md:block">
+                    <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- NOUVEAU: Section Notre Équipe (Déplacée ici) -->
+        <section class="my-16 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Une Équipe d'Experts à Vos Côtés</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-12">Nous avons rassemblé des seniors passionnés, reconnus dans leur domaine, pour vous transmettre leur savoir-faire unique.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Membre 1 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img class="w-32 h-32 rounded-full mx-auto -mt-16 border-4 border-white" src="https://i.pravatar.cc/150?img=1" alt="Membre de l'équipe 1">
+                    <h3 class="font-bold text-xl mt-4">Jean Dupont</h3>
+                    <p class="text-gold font-semibold">CTO @ TechInnov</p>
+                    <p class="text-sm text-gray-600 mt-2">Expert en architecture microservices et stratégies de scalabilité.</p>
+                </div>
+                <!-- Membre 2 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img class="w-32 h-32 rounded-full mx-auto -mt-16 border-4 border-white" src="https://i.pravatar.cc/150?img=2" alt="Membre de l'équipe 2">
+                    <h3 class="font-bold text-xl mt-4">Aïcha Diallo</h3>
+                    <p class="text-gold font-semibold">Lead Frontend Dev</p>
+                    <p class="text-sm text-gray-600 mt-2">Spécialiste React et performance web, obsédée par l'expérience utilisateur.</p>
+                </div>
+                <!-- Membre 3 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img class="w-32 h-32 rounded-full mx-auto -mt-16 border-4 border-white" src="https://i.pravatar.cc/150?img=3" alt="Membre de l'équipe 3">
+                    <h3 class="font-bold text-xl mt-4">Moussa Traoré</h3>
+                    <p class="text-gold font-semibold">Ingénieur DevOps Senior</p>
+                    <p class="text-sm text-gray-600 mt-2">Maître de l'automatisation, CI/CD et des infrastructures cloud robustes.</p>
+                </div>
+                <!-- Membre 4 -->
+                <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <img class="w-32 h-32 rounded-full mx-auto -mt-16 border-4 border-white" src="https://i.pravatar.cc/150?img=4" alt="Membre de l'équipe 4">
+                    <h3 class="font-bold text-xl mt-4">Fatou N'diaye</h3>
+                    <p class="text-gold font-semibold">Data Scientist</p>
+                    <p class="text-sm text-gray-600 mt-2">Transforme les données brutes en décisions stratégiques grâce au Machine Learning.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- NOUVEAU: Conteneur principal pour les sections de produits par catégorie -->
         <div id="category-products-sections-container" class="space-y-12">
             <!-- Squelette de chargement pour les sections de catégorie -->
@@ -295,41 +357,6 @@
                 <!-- Squelette de chargement pour la liste des catégories -->
                 <div class="animate-pulse grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-x-4 gap-y-2">
                     <div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div><div class="h-5 bg-gray-200 rounded"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- NOUVEAU: Section Success Stories -->
-        <section class="my-16">
-            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">Ils ont lancé leur business pendant leurs études</h2>
-            <p class="max-w-3xl mx-auto text-gray-600 text-center mb-12">Inspiré par notre devise "un pied à l'école, un pied dans le business", ils ont transformé leurs compétences en revenus.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Story 1 -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Marie, étudiante en marketing" class="w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h3 class="font-bold text-xl">Marie, 21 ans</h3>
-                        <p class="text-gold font-semibold">Étudiante en Marketing</p>
-                        <p class="text-sm text-gray-600 mt-2">"Avec le cours sur le Community Management, j'ai lancé mon agence et je gère les réseaux sociaux de 3 entreprises locales. Je finance mes études et j'acquiers une expérience incroyable."</p>
-                    </div>
-                </div>
-                <!-- Story 2 -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <img src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Karim, étudiant en informatique" class="w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h3 class="font-bold text-xl">Karim, 23 ans</h3>
-                        <p class="text-gold font-semibold">Étudiant en Informatique</p>
-                        <p class="text-sm text-gray-600 mt-2">"Le cours sur la création de sites e-commerce m'a permis de créer une boutique en ligne pour des artisans de ma région. C'est devenu une vraie petite entreprise à côté de mes cours."</p>
-                    </div>
-                </div>
-                <!-- Story 3 -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                    <img src="https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Awa, étudiante en gestion" class="w-full h-56 object-cover">
-                    <div class="p-6">
-                        <h3 class="font-bold text-xl">Awa, 22 ans</h3>
-                        <p class="text-gold font-semibold">Étudiante en Gestion</p>
-                        <p class="text-sm text-gray-600 mt-2">"Grâce à la formation sur les outils no-code, j'ai automatisé des processus pour des PME. Ce revenu complémentaire me donne une grande liberté financière."</p>
-                    </div>
                 </div>
             </div>
         </section>
@@ -420,6 +447,7 @@
 
     <!-- OPTIMISATION: L'attribut 'defer' charge le script en parallèle et l'exécute après l'analyse du HTML -->
     <script src="js/main.js" defer></script>
+
     <!-- NOUVEAU: Script pour l'animation de la section "À Propos" -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -439,6 +467,56 @@
             });
 
             observer.observe(aboutSection);
+        });
+
+        // NOUVEAU: Script pour le carrousel des Success Stories
+        const successStories = [
+            { name: 'Mark Zuckerberg', university: 'Harvard', business: 'Facebook', detail: 'Créé en 2004 depuis sa chambre universitaire.', image: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Larry Page & Sergey Brin', university: 'Stanford', business: 'Google', detail: 'Projet de thèse devenu moteur de recherche mondial.', image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Michael Dell', university: 'University of Texas', business: 'Dell Computers', detail: 'Assemblait et vendait des PC depuis son dortoir.', image: 'https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Evan Spiegel', university: 'Stanford', business: 'Snapchat', detail: 'Né d’un projet de classe en design produit.', image: 'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Drew Houston', university: 'MIT', business: 'Dropbox', detail: 'A codé la première version pour résoudre un problème personnel de synchronisation de fichiers.', image: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Alexis Ohanian & Steve Huffman', university: 'University of Virginia', business: 'Reddit', detail: 'Projet incubé par Y Combinator pendant leurs études.', image: 'https://images.pexels.com/photos/3182773/pexels-photo-3182773.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Vitalik Buterin', university: 'University of Waterloo', business: 'Ethereum', detail: 'A commencé à coder Ethereum pendant ses études avant de s\'y consacrer à plein temps.', image: 'https://images.pexels.com/photos/844124/pexels-photo-844124.jpeg?auto=compress&cs=tinysrgb&w=600' }
+        ];
+
+        const carouselContainer = document.getElementById('success-carousel');
+        const dotsContainer = document.getElementById('success-carousel-dots');
+
+        carouselContainer.innerHTML = successStories.map(story => `
+            <div class="promo-carousel-item flex-shrink-0 w-full md:w-1/3 p-4">
+                <div class="bg-white h-full rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 flex flex-col">
+                    <img src="${story.image}" alt="${story.name}" class="w-full h-48 object-cover">
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="font-bold text-xl">${story.name}</h3>
+                        <p class="text-sm text-gray-500">${story.university}</p>
+                        <p class="text-gold font-semibold mt-2">${story.business}</p>
+                        <p class="text-sm text-gray-600 mt-2 flex-grow">"${story.detail}"</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        dotsContainer.innerHTML = successStories.map((_, index) => `<button class="carousel-dot" data-index="${index}"></button>`).join('');
+
+        initializePromoCarousel('success-carousel');
+
+        // Fonction de défilement pour les boutons
+        function scrollCarousel(carouselId, direction) {
+            const carousel = document.getElementById(carouselId);
+            if (!carousel) return;
+            const itemWidth = carousel.querySelector('.promo-carousel-item').offsetWidth;
+            carousel.scrollBy({ left: itemWidth * direction, behavior: 'smooth' });
+        }
+
+        // Rendre la fonction globale pour qu'elle soit accessible depuis le HTML
+        window.scrollCarousel = scrollCarousel;
+
+        // Initialiser le carrousel
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.getElementById('success-carousel')) {
+                initializePromoCarousel('success-carousel');
+            }
         });
     </script>
 
