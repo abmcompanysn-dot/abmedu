@@ -25,6 +25,19 @@ let DELIVERY_OPTIONS = {}; // NOUVEAU: Sera chargé depuis l'API
 document.addEventListener('DOMContentLoaded', () => {
     // Initialiser toutes les fonctionnalités du site
     initializeApp();
+
+    // NOUVEAU: Enregistrement du Service Worker pour la PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/js/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker enregistré avec succès: ', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Échec de l\'enregistrement du ServiceWorker: ', error);
+                });
+        });
+    }
 });
 
 
