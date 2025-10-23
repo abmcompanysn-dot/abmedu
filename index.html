@@ -375,6 +375,15 @@
             </div>
         </section>
 
+        <!-- NOUVEAU: Section FAQ (Foire Aux Questions) -->
+        <section class="my-16">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-4">Questions Fréquemment Posées</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 text-center mb-12">Trouvez ici les réponses à vos interrogations les plus courantes.</p>
+            <div id="faq-container" class="max-w-3xl mx-auto space-y-4">
+                <!-- Les questions/réponses seront injectées ici par JavaScript -->
+            </div>
+        </section>
+
     </main>
 
 
@@ -472,7 +481,7 @@
         // NOUVEAU: Script pour le carrousel des Success Stories
         const successStories = [
             { name: 'Mark Zuckerberg', university: 'Harvard', business: 'Facebook', detail: 'Créé en 2004 depuis sa chambre universitaire.', image: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=600' },
-            { name: 'Larry Page & Sergey Brin', university: 'Stanford', business: 'Google', detail: 'Projet de thèse devenu moteur de recherche mondial.', image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600' },
+            { name: 'Larry Page & S. Brin', university: 'Stanford', business: 'Google', detail: 'Projet de thèse devenu moteur de recherche mondial.', image: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=600' },
             { name: 'Michael Dell', university: 'University of Texas', business: 'Dell Computers', detail: 'Assemblait et vendait des PC depuis son dortoir.', image: 'https://images.pexels.com/photos/2102416/pexels-photo-2102416.jpeg?auto=compress&cs=tinysrgb&w=600' },
             { name: 'Evan Spiegel', university: 'Stanford', business: 'Snapchat', detail: 'Né d’un projet de classe en design produit.', image: 'https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg?auto=compress&cs=tinysrgb&w=600' },
             { name: 'Drew Houston', university: 'MIT', business: 'Dropbox', detail: 'A codé la première version pour résoudre un problème personnel de synchronisation de fichiers.', image: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=600' },
@@ -484,7 +493,7 @@
         const dotsContainer = document.getElementById('success-carousel-dots');
 
         carouselContainer.innerHTML = successStories.map(story => `
-            <div class="promo-carousel-item flex-shrink-0 w-full md:w-1/3 p-4">
+            <div class="promo-carousel-item flex-shrink-0 w-full md:w-1/2 lg:w-1/3 p-4">
                 <div class="bg-white h-full rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 flex flex-col">
                     <img src="${story.image}" alt="${story.name}" class="w-full h-48 object-cover">
                     <div class="p-6 flex-grow flex flex-col">
@@ -497,15 +506,24 @@
             </div>
         `).join('');
 
-        dotsContainer.innerHTML = successStories.map((_, index) => `<button class="carousel-dot" data-index="${index}"></button>`).join('');
-
-        initializePromoCarousel('success-carousel');
+        // Le nombre de points dépend de la taille de l'écran
+        const itemsPerView = window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1);
+        const dotCount = Math.ceil(successStories.length / itemsPerView);
+        dotsContainer.innerHTML = Array.from({ length: dotCount }, (_, index) => `<button class="carousel-dot" data-index="${index}"></button>`).join('');
 
         // Fonction de défilement pour les boutons
         function scrollCarousel(carouselId, direction) {
             const carousel = document.getElementById(carouselId);
             if (!carousel) return;
-            const itemWidth = carousel.querySelector('.promo-carousel-item').offsetWidth;
+            // MODIFICATION: On défile de la largeur du conteneur, pas d'un seul item
+            const scrollAmount = carousel.offsetWidth;
+            carousel.scrollBy({ left: scrollAmount * direction, behavior: 'smooth' });
+        }
+
+        // Fonction de défilement pour les points de navigation
+        function goToSlide(carouselId, slideIndex) {
+            const carousel = document.getElementById(carouselId);
+            const itemWidth = carousel.querySelector('.promo-carousel-item').offsetWidth; // Largeur d'un seul item
             carousel.scrollBy({ left: itemWidth * direction, behavior: 'smooth' });
         }
 
@@ -516,6 +534,50 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('success-carousel')) {
                 initializePromoCarousel('success-carousel');
+            }
+
+            // NOUVEAU: Script pour la section FAQ
+            const faqData = [
+                { question: "Les cours sont-ils accessibles à vie ?", reponse: "Oui, une fois que vous avez acheté un cours, vous y avez accès à vie, y compris toutes les futures mises à jour, depuis votre espace personnel." },
+                { question: "Quels sont les prérequis pour suivre une formation ?", reponse: "Chaque cours a ses propres prérequis listés sur sa page de description. La plupart de nos cours d'introduction ne nécessitent aucune connaissance préalable, juste de la motivation !" },
+                { question: "Puis-je obtenir un remboursement si je ne suis pas satisfait ?", reponse: "Absolument. Nous offrons une garantie 'satisfait ou remboursé' de 14 jours. Si le cours ne répond pas à vos attentes, contactez notre support pour un remboursement complet." },
+                { question: "Comment puis-je devenir formateur sur ABMEDU ?", reponse: "Nous sommes toujours à la recherche d'experts passionnés ! Vous pouvez postuler en vous rendant sur notre page 'Devenir Formateur' et en remplissant le formulaire d'inscription. Notre équipe examinera votre profil." },
+                { question: "Proposez-vous des certifications à la fin des cours ?", reponse: "Oui, à la fin de chaque cours, après avoir réussi les évaluations, vous recevrez un certificat de complétion que vous pourrez ajouter à votre CV ou votre profil LinkedIn pour valoriser vos nouvelles compétences." }
+            ];
+
+            const faqContainer = document.getElementById('faq-container');
+            faqContainer.innerHTML = faqData.map((item, index) => `
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <button onclick="toggleFaq(${index})" class="w-full flex justify-between items-center text-left p-5 font-semibold text-gray-800">
+                        <span>${item.question}</span>
+                        <svg id="faq-icon-${index}" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="faq-answer-${index}" class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <p class="p-5 pt-0 text-gray-600">${item.reponse}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Fonction pour déplier/replier la FAQ
+            window.toggleFaq = function(index) {
+                const answer = document.getElementById(`faq-answer-${index}`);
+                const icon = document.getElementById(`faq-icon-${index}`);
+
+                // Fermer toutes les autres réponses
+                document.querySelectorAll('.faq-answer').forEach((el, i) => {
+                    if (i !== index) {
+                        el.style.maxHeight = '0px';
+                        document.getElementById(`faq-icon-${i}`).classList.remove('rotate-180');
+                    }
+                });
+
+                if (answer.style.maxHeight && answer.style.maxHeight !== '0px') {
+                    answer.style.maxHeight = '0px';
+                    icon.classList.remove('rotate-180');
+                } else {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    icon.classList.add('rotate-180');
+                }
             }
         });
     </script>
