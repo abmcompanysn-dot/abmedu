@@ -678,6 +678,55 @@ function fillCategoryProducts(catalog) {
 }
 
 /**
+ * NOUVEAU: Applique les filtres sur la page des promotions.
+ */
+function applyPromotionFilters(catalog) {
+    const resultsContainer = document.getElementById('promotion-results-container');
+    const resultsCount = document.getElementById('promotion-results-count');
+    if (!resultsContainer) return;
+
+    const sortValue = document.getElementById('filter-sort').value;
+    const levelValue = document.getElementById('filter-level').value;
+
+    const allProducts = catalog.data.products || [];
+    let filteredProducts = allProducts.filter(p => p['Réduction%'] && parseFloat(p['Réduction%']) > 0);
+
+    // 1. Filtrer par niveau
+    if (levelValue !== 'all') {
+        filteredProducts = filteredProducts.filter(p => p.Niveau === levelValue);
+    }
+
+    // 2. Trier
+    switch (sortValue) {
+        case 'price-asc':
+            filteredProducts.sort((a, b) => (a.Prix || 0) - (b.Prix || 0));
+            break;
+        case 'price-desc':
+            filteredProducts.sort((a, b) => (b.Prix || 0) - (a.Prix || 0));
+            break;
+        case 'rating-desc':
+            filteredProducts.sort((a, b) => {
+                const ratingA = parseFloat(a.Note_Moyenne) || 0;
+                const ratingB = parseFloat(b.Note_Moyenne) || 0;
+                return ratingB - ratingA;
+            });
+            break;
+    }
+
+    // 3. Afficher les résultats
+    resultsCount.textContent = `${filteredProducts.length} produit(s) trouvé(s).`;
+    if (filteredProducts.length === 0) {
+        resultsContainer.innerHTML = `<p class="col-span-full text-center text-gray-500">Aucun produit ne correspond à vos critères.</p>`;
+    } else {
+        resultsContainer.innerHTML = filteredProducts.map(product => renderProductCard(product)).join('');
+    }
+
+    // NOUVEAU: Ré-attacher les états de "like" après le re-rendu
+    updateAllLikeButtonsState();
+}
+
+
+/**
  * NOUVEAU: Affiche les produits en promotion.
  */
 function displayPromotionProducts(catalog) {
@@ -701,6 +750,11 @@ function displayPromotionProducts(catalog) {
 
         const resultsHTML = discountedProducts.map(product => renderProductCard(product)).join('');
         resultsContainer.innerHTML = resultsHTML;
+
+        // NOUVEAU: Attacher l'événement au bouton de filtre
+        document.getElementById('apply-filters-btn').addEventListener('click', () => {
+            applyPromotionFilters(catalog);
+        });
 
     } catch (error) {
         console.error("Erreur lors de l'affichage des promotions:", error);
@@ -1651,6 +1705,12 @@ function renderProductCard(course) {
     return stars;
   };
 
+  // NOUVEAU: Vérifier si le cours est "liké"
+  const likedCourses = getLikedCourses();
+  const isLiked = likedCourses.includes(courseId);
+  const likedClass = isLiked ? 'liked' : '';
+  const iconClass = isLiked ? 'fas' : 'far';
+
   return `
   <div class="product-card bg-white rounded-lg shadow-md overflow-hidden block group">
       <a href="produit.html?id=${courseId}" class="block">
@@ -1659,8 +1719,8 @@ function renderProductCard(course) {
                   <img src="${coverImage}" alt="${courseName}" class="h-full w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='${CONFIG.DEFAULT_PRODUCT_IMAGE}';">
               </div>
               <!-- NOUVEAU: Bouton Like -->
-              <button onclick="toggleLike(event, this)" class="like-btn absolute top-2 right-2 bg-white/70 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500">
-                  <i class="far fa-heart"></i>
+              <button onclick="toggleLike(event, this, '${courseId}')" data-course-id="${courseId}" class="like-btn ${likedClass} absolute top-2 right-2 bg-white/70 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500">
+                  <i class="${iconClass} fa-heart"></i>
               </button>
           </div>
       </a>
@@ -1692,17 +1752,48 @@ function renderProductCard(course) {
  * NOUVEAU: Gère l'animation de "like" sur un cours.
  * @param {Event} event L'événement du clic.
  * @param {HTMLElement} button L'élément bouton qui a été cliqué.
+ * @param {string} courseId L'ID du cours.
  */
-function toggleLike(event, button) {
+function toggleLike(event, button, courseId) {
     // Empêche le clic de déclencher la navigation vers la page produit.
     event.preventDefault();
     event.stopPropagation();
 
-    button.classList.toggle('liked');
+    let likedCourses = getLikedCourses();
+    const isLiked = likedCourses.includes(courseId);
+
+    if (isLiked) {
+        // Unlike
+        likedCourses = likedCourses.filter(id => id !== courseId);
+        button.classList.remove('liked');
+    } else {
+        // Like
+        likedCourses.push(courseId);
+        button.classList.add('liked');
+    }
+
+    saveLikedCourses(likedCourses);
+
     const icon = button.querySelector('i');
-    icon.classList.toggle('far'); // 'far' est pour l'icône vide
-    icon.classList.toggle('fas'); // 'fas' est pour l'icône pleine
+    icon.className = `fa-heart ${isLiked ? 'far' : 'fas'}`; // Mettre à jour l'icône
 }
+
+/**
+ * NOUVEAU: Récupère les cours "likés" depuis le localStorage.
+ * @returns {string[]} Un tableau d'ID de cours.
+ */
+function getLikedCourses() {
+    return JSON.parse(localStorage.getItem('abmedu_liked_courses')) || [];
+}
+
+/**
+ * NOUVEAU: Sauvegarde les cours "likés" dans le localStorage.
+ * @param {string[]} likedIds Un tableau d'ID de cours.
+ */
+function saveLikedCourses(likedIds) {
+    localStorage.setItem('abmedu_liked_courses', JSON.stringify(likedIds));
+}
+
 /**
  * NOUVEAU: Copie le lien du produit dans le presse-papiers et affiche une notification.
  * @param {Event} event 
