@@ -1122,6 +1122,12 @@ function loadCoursePage(catalog) {
         document.getElementById('prerequisites-list').innerHTML = (course.Prérequis || "").split(';').map(req => `<li>${req.trim()}</li>`).join('');
         document.getElementById('target-audience-text').textContent = course.Public_Cible;
 
+        // NOUVEAU: Initialiser le formulaire d'avis
+        initializeReviewForm(course);
+
+        // NOUVEAU: Charger et afficher les avis du cours
+        loadCourseReviews(courseId);
+
         // --- Cours similaires ---
         const similarCoursesContainer = document.getElementById('similar-courses-container');
         renderSimilarProducts(course, data.products, similarCoursesContainer);
@@ -1131,6 +1137,159 @@ function loadCoursePage(catalog) {
         const mainContent = document.querySelector('main');
         if(mainContent) mainContent.innerHTML = `<p class="text-center text-red-500">Impossible de charger les informations du cours. Veuillez réessayer.</p>`;
     }
+}
+
+/**
+ * NOUVEAU: Charge et affiche les avis pour un cours spécifique.
+ * @param {string} courseId L'ID du cours.
+ */
+async function loadCourseReviews(courseId) {
+    const container = document.getElementById('course-reviews-container');
+    if (!container) return;
+    container.innerHTML = '<p class="text-gray-500">Chargement des avis...</p>';
+
+    try {
+        const response = await fetch(`${CONFIG.COURSE_API_URL}?action=getReviewsByCourseId&courseId=${courseId}`);
+        const result = await response.json();
+
+        if (!result.success) throw new Error(result.error);
+
+        const reviews = result.data;
+        if (reviews.length === 0) {
+            container.innerHTML = '<p class="text-gray-500">Soyez le premier à laisser un avis sur ce cours !</p>';
+            return;
+        }
+
+        const reviewsHTML = reviews.map(review => {
+            const rating = parseInt(review.Note);
+            const starsHTML = Array(5).fill(0).map((_, i) => 
+                `<span class="text-xl ${i < rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>`
+            ).join('');
+            
+            // Anonymiser le nom de l'utilisateur
+            const userName = "Utilisateur vérifié";
+
+            const replyHTML = review.Reponse_Formateur ? `
+                <div class="mt-4 ml-8 p-4 bg-gray-50 rounded-lg border-l-4 border-gold">
+                    <p class="font-bold text-sm text-gray-800">Réponse du formateur :</p>
+                    <p class="italic text-gray-700">"${review.Reponse_Formateur}"</p>
+                    <p class="text-xs text-gray-400 text-right mt-2">Le ${new Date(review.Date_Reponse).toLocaleDateString('fr-FR')}</p>
+                </div>
+            ` : '';
+
+            return `
+                <div class="py-4 border-b">
+                    <div class="flex items-center mb-2">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-500 mr-3">${userName.charAt(0)}</div>
+                        <div>
+                            <p class="font-semibold">${userName}</p>
+                            <div class="flex items-center">${starsHTML}</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700">${review.Commentaire}</p>
+                    <p class="text-xs text-gray-400 text-right mt-2">Publié le ${new Date(review.Date_Avis).toLocaleDateString('fr-FR')}</p>
+                    ${replyHTML}
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = reviewsHTML;
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des avis du cours:", error);
+        container.innerHTML = '<p class="text-red-500">Impossible de charger les avis pour le moment.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Initialise le formulaire d'avis sur la page produit.
+ * @param {object} course - L'objet cours.
+ */
+async function initializeReviewForm(course) {
+    const reviewSection = document.getElementById('leave-review-section');
+    const user = JSON.parse(localStorage.getItem('abmcyUser'));
+
+    // Conditions pour afficher le formulaire :
+    // 1. L'utilisateur doit être connecté.
+    // 2. L'utilisateur doit avoir acheté ce cours.
+    if (!user || !reviewSection) return;
+
+    try {
+        const purchasedResponse = await fetch(`${CONFIG.COURSE_API_URL}?action=getCoursAchetes&userId=${user.IDClient}`);
+        const purchasedResult = await purchasedResponse.json();
+        if (purchasedResult.success && purchasedResult.data.includes(course.ID_Cours)) {
+            reviewSection.classList.remove('hidden');
+        } else {
+            return; // L'utilisateur n'a pas acheté le cours, on n'affiche pas le formulaire.
+        }
+    } catch (error) {
+        console.error("Erreur de vérification de l'achat:", error);
+        return;
+    }
+
+    // Logique pour la sélection des étoiles
+    const starsContainer = document.getElementById('review-rating-stars');
+    const ratingInput = document.getElementById('review-rating');
+    const stars = Array.from(starsContainer.children);
+
+    stars.forEach(star => {
+        star.addEventListener('mouseover', () => {
+            const hoverValue = parseInt(star.dataset.value);
+            stars.forEach((s, i) => {
+                s.classList.toggle('text-yellow-400', i < hoverValue);
+                s.classList.toggle('text-gray-300', i >= hoverValue);
+            });
+        });
+
+        star.addEventListener('click', () => {
+            const clickValue = parseInt(star.dataset.value);
+            ratingInput.value = clickValue;
+            stars.forEach((s, i) => {
+                s.dataset.selected = (i < clickValue);
+            });
+        });
+    });
+
+    starsContainer.addEventListener('mouseout', () => {
+        stars.forEach(s => {
+            s.classList.toggle('text-yellow-400', s.dataset.selected === 'true');
+            s.classList.toggle('text-gray-300', s.dataset.selected !== 'true');
+        });
+    });
+
+    // Logique de soumission du formulaire
+    const reviewForm = document.getElementById('review-form');
+    reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitButton = reviewForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Envoi en cours...';
+
+        const payload = {
+            action: 'submitReview',
+            data: {
+                userId: user.IDClient,
+                courseId: course.ID_Cours,
+                courseName: course.Nom_Cours,
+                rating: parseInt(ratingInput.value),
+                comment: document.getElementById('review-comment').value
+            }
+        };
+
+        try {
+            const response = await fetch(CONFIG.COURSE_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const result = await response.json();
+            if (!result.success) throw new Error(result.error);
+            showToast("Merci ! Votre avis a été publié.", false);
+            reviewForm.reset();
+            stars.forEach(s => { s.dataset.selected = 'false'; s.classList.remove('text-yellow-400'); s.classList.add('text-gray-300'); });
+        } catch (error) {
+            showToast(`Erreur : ${error.message}`, true);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Envoyer mon avis';
+        }
+    });
 }
 
 /**
@@ -2752,6 +2911,12 @@ function initializeAccountPage() {
     // NOUVEAU: Ajouter le lien "Catalogue" au menu du dashboard
     const dashboardNav = document.querySelector('.account-nav ul');
     if (dashboardNav) {
+        // NOUVEAU: Afficher l'onglet "Gestion des Avis" si l'utilisateur est un Senior
+        if (user.Role === 'Senior') {
+            const manageReviewsTab = document.getElementById('tab-manage-reviews');
+            if (manageReviewsTab) manageReviewsTab.classList.remove('hidden');
+        }
+
         const catalogLink = document.createElement('li');
         catalogLink.innerHTML = `<a href="promotions.html" class="account-tab flex items-center p-3 text-gray-600 hover:bg-gray-100 rounded-lg"><svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"></path></svg>Catalogue</a>`;
         dashboardNav.appendChild(catalogLink);
@@ -2762,6 +2927,8 @@ function initializeAccountPage() {
     loadMyCourses(user.IDClient);
     loadUserActivityLog(user.IDClient);
     // La fonction pour charger les notifications sera appelée par initializeNotificationPage si besoin
+    loadMyReviews(user.IDClient); // NOUVEAU
+    if (user.Role === 'Senior') loadSeniorReviews(user.Nom); // NOUVEAU
     loadMyCertificates(user.IDClient, user); // NOUVEAU: Passer l'objet user
     loadAllCoursesForAccountPage(); // NOUVEAU
     initializeProfileForm(user); // NOUVEAU
@@ -2987,6 +3154,9 @@ function generateCertificatePDF(studentName, courseName) {
     showToast("Téléchargement du certificat en cours...", false);
 }
 
+// NOUVEAU: Variable pour stocker tous les cours de la page compte
+let allExploreCourses = [];
+
 /**
  * NOUVEAU: Charge et affiche tous les cours disponibles dans l'onglet "Explorer" de la page compte.
  */
@@ -2999,16 +3169,182 @@ async function loadAllCoursesForAccountPage() {
 
     try {
         const catalog = await getCatalogAndRefreshInBackground();
-        const allProducts = catalog.data.products || [];
+        allExploreCourses = catalog.data.products || [];
 
-        if (allProducts.length === 0) {
+        if (allExploreCourses.length === 0) {
             container.innerHTML = '<p class="col-span-full text-center text-gray-500">Aucun cours disponible pour le moment.</p>';
             return;
         }
-        container.innerHTML = allProducts.map(course => renderProductCard(course)).join('');
+        
+        // Afficher tous les cours initialement
+        filterAndRenderExploreCourses();
+
+        // Ajouter les écouteurs d'événements pour les filtres
+        document.getElementById('explore-search-input').addEventListener('input', filterAndRenderExploreCourses);
+        document.getElementById('explore-filter-level').addEventListener('change', filterAndRenderExploreCourses);
+
     } catch (error) {
         console.error("Erreur lors du chargement de tous les cours:", error);
         container.innerHTML = '<p class="col-span-full text-center text-red-500">Impossible de charger le catalogue des cours.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Filtre et affiche les cours dans l'onglet "Explorer" de la page compte.
+ */
+function filterAndRenderExploreCourses() {
+    const container = document.getElementById('explore-courses-list');
+    if (!container) return;
+
+    const searchQuery = document.getElementById('explore-search-input').value.toLowerCase();
+    const levelFilter = document.getElementById('explore-filter-level').value;
+
+    let filteredCourses = allExploreCourses;
+
+    // 1. Filtrer par recherche textuelle
+    if (searchQuery) {
+        filteredCourses = filteredCourses.filter(course => 
+            (course.Nom_Cours || course.Nom).toLowerCase().includes(searchQuery) ||
+            (course.Formateur_Nom || '').toLowerCase().includes(searchQuery)
+        );
+    }
+
+    // 2. Filtrer par niveau
+    if (levelFilter !== 'all') {
+        filteredCourses = filteredCourses.filter(course => course.Niveau === levelFilter);
+    }
+
+    if (filteredCourses.length === 0) {
+        container.innerHTML = '<p class="col-span-full text-center text-gray-500">Aucun cours ne correspond à vos critères.</p>';
+    } else {
+        container.innerHTML = filteredCourses.map(course => renderProductCard(course)).join('');
+    }
+}
+
+/**
+ * NOUVEAU: Charge et affiche les avis de l'utilisateur dans son espace compte.
+ */
+async function loadMyReviews(userId) {
+    const container = document.getElementById('my-reviews-list');
+    if (!container) return;
+    container.innerHTML = '<p class="text-gray-500 text-center">Chargement de vos avis...</p>';
+
+    try {
+        const response = await fetch(`${CONFIG.COURSE_API_URL}?action=getReviewsByUserId&userId=${userId}`);
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.error || "Impossible de charger vos avis.");
+        }
+
+        const reviews = result.data;
+
+        if (reviews.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center">Vous n\'avez laissé aucun avis pour le moment.</p>';
+            return;
+        }
+
+        const reviewsHTML = reviews.map(review => {
+            const rating = parseInt(review.Note);
+            const starsHTML = Array(5).fill(0).map((_, i) => 
+                `<span class="text-lg ${i < rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>`
+            ).join('');
+
+            return `
+                <div class="border rounded-lg p-4">
+                    <p class="font-bold text-sm text-gray-600">Avis sur : <a href="produit.html?id=${review.ID_Cours}" class="text-blue-600 hover:underline">${review.Nom_Cours}</a></p>
+                    <div class="flex items-center my-2">${starsHTML}</div>
+                    <p class="italic text-gray-700">"${review.Commentaire}"</p>
+                    <p class="text-xs text-gray-400 text-right mt-2">Publié le ${new Date(review.Date_Avis).toLocaleDateString('fr-FR')}</p>
+                </div>
+            `;
+        }).join('');
+        container.innerHTML = reviewsHTML;
+    } catch (error) {
+        console.error("Erreur lors du chargement des avis:", error);
+        container.innerHTML = '<p class="text-red-500 text-center">Une erreur est survenue lors du chargement de vos avis.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Charge les avis pour les cours d'un formateur (Senior).
+ */
+async function loadSeniorReviews(formateurNom) {
+    const container = document.getElementById('senior-reviews-list');
+    if (!container) return;
+    container.innerHTML = '<p class="text-gray-500 text-center">Chargement des avis sur vos cours...</p>';
+
+    try {
+        // On récupère tous les cours du formateur
+        const coursesResponse = await fetch(`${CONFIG.COURSE_API_URL}?action=getCoursesBySenior&formateurNom=${encodeURIComponent(formateurNom)}`);
+        const coursesResult = await coursesResponse.json();
+        if (!coursesResult.success) throw new Error(coursesResult.error);
+        const courseIds = coursesResult.data.map(c => c.ID_Cours);
+
+        // On récupère tous les avis et on filtre côté client
+        // (Alternative: créer une API `getReviewsByCourseIds`, mais plus complexe)
+        const allReviewsResponse = await fetch(`${CONFIG.COURSE_API_URL}?action=getReviewsByCourseId&courseId=all`); // On suppose que l'API peut gérer "all"
+        const allReviewsResult = await allReviewsResponse.json();
+        if (!allReviewsResult.success) throw new Error(allReviewsResult.error);
+        
+        const myReviews = allReviewsResult.data.filter(review => courseIds.includes(review.ID_Cours));
+
+        if (myReviews.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center">Aucun avis n\'a été laissé sur vos cours pour le moment.</p>';
+            return;
+        }
+
+        const reviewsHTML = myReviews.map(review => {
+            const rating = parseInt(review.Note);
+            const starsHTML = Array(5).fill(0).map((_, i) => `<span class="text-lg ${i < rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>`).join('');
+            const isAnswered = review.Reponse_Formateur && review.Reponse_Formateur.trim() !== '';
+
+            return `
+                <div class="border rounded-lg p-4 ${isAnswered ? 'bg-green-50' : 'bg-orange-50'}">
+                    <p class="font-bold text-sm text-gray-600">Avis sur : <a href="produit.html?id=${review.ID_Cours}" class="text-blue-600 hover:underline">${review.Nom_Cours}</a></p>
+                    <div class="flex items-center my-2">${starsHTML}</div>
+                    <p class="italic text-gray-700">"${review.Commentaire}"</p>
+                    ${isAnswered ? `
+                        <div class="mt-3 pt-3 border-t">
+                            <p class="font-semibold text-sm text-green-800">Votre réponse :</p>
+                            <p class="italic text-gray-700">"${review.Reponse_Formateur}"</p>
+                        </div>
+                    ` : `
+                        <form class="mt-3 pt-3 border-t" onsubmit="handleReviewReply(event, '${review.ID_Avis}')">
+                            <textarea class="w-full border-gray-300 rounded-md shadow-sm text-sm" rows="2" placeholder="Répondez à cet avis..." required></textarea>
+                            <button type="submit" class="text-sm bg-blue-600 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-700 transition mt-2">Envoyer la réponse</button>
+                        </form>
+                    `}
+                </div>
+            `;
+        }).join('');
+        container.innerHTML = reviewsHTML;
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des avis pour le formateur:", error);
+        container.innerHTML = '<p class="text-red-500 text-center">Une erreur est survenue lors du chargement des avis.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Gère la soumission de la réponse d'un formateur à un avis.
+ */
+async function handleReviewReply(event, reviewId) {
+    event.preventDefault();
+    const form = event.target;
+    const textarea = form.querySelector('textarea');
+    const user = JSON.parse(localStorage.getItem('abmcyUser'));
+
+    const payload = { action: 'submitReviewReply', data: { reviewId, replyText: textarea.value, formateurNom: user.Nom } };
+
+    try {
+        const response = await fetch(CONFIG.COURSE_API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await response.json();
+        if (!result.success) throw new Error(result.error);
+        showToast("Réponse publiée !", false);
+        loadSeniorReviews(user.Nom); // Recharger la section pour voir la mise à jour
+    } catch (error) {
+        showToast(`Erreur : ${error.message}`, true);
     }
 }
 

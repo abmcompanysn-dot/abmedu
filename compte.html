@@ -131,6 +131,14 @@
                         <a href="#" onclick="switchAccountTab('profile')" id="tab-profile" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
                             <span>Modifier mon profil</span>
                         </a>
+                        <!-- NOUVEAU: Onglet Mes avis -->
+                        <a href="#" onclick="switchAccountTab('reviews')" id="tab-reviews" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
+                            <span>Mes avis</span>
+                        </a>
+                        <!-- NOUVEAU: Onglet Gestion des avis (pour les Seniors) -->
+                        <a href="#" onclick="switchAccountTab('manage-reviews')" id="tab-manage-reviews" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg hidden">
+                            <span class="text-blue-600 font-semibold">Gestion des Avis</span>
+                        </a>
                         <a href="#" id="logout-nav-link" class="flex items-center space-x-3 p-3 text-red-600 hover:bg-red-50 rounded-lg">
                             <span>Se déconnecter</span>
                         </a>
@@ -170,9 +178,41 @@
                     <div id="my-certificates-list" class="space-y-4"></div>
                 </div>
 
+                <!-- NOUVEAU: Contenu pour les avis -->
+                <div id="content-reviews" class="account-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Mes avis publiés</h3>
+                    <div id="my-reviews-list" class="space-y-4"></div>
+                </div>
+
+                <!-- NOUVEAU: Contenu pour la gestion des avis (pour les Seniors) -->
+                <div id="content-manage-reviews" class="account-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Avis sur vos cours</h3>
+                    <p class="text-sm text-gray-500 mb-4">Répondez aux questions et commentaires de vos apprenants pour améliorer leur expérience.</p>
+                    <div id="senior-reviews-list" class="space-y-6"></div>
+                </div>
+
                 <!-- NOUVEAU: Contenu pour explorer les cours -->
                 <div id="content-explore" class="account-content bg-white p-8 rounded-lg shadow hidden">
                     <h3 class="text-xl font-bold mb-6">Explorer tous nos cours</h3>
+                    <!-- NOUVEAU: Barre de recherche et filtres -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6 flex flex-wrap items-center gap-4">
+                        <div class="relative flex-grow">
+                            <input type="search" id="explore-search-input" placeholder="Rechercher un cours..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="explore-filter-level" class="sr-only">Niveau</label>
+                            <select id="explore-filter-level" class="border-gray-300 rounded-md shadow-sm focus:border-gold focus:ring-gold">
+                                <option value="all">Tous les niveaux</option>
+                                <option value="Débutant">Débutant</option>
+                                <option value="Intermédiaire">Intermédiaire</option>
+                                <option value="Expert">Expert</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div id="explore-courses-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Les cours seront injectés ici -->
                     </div>

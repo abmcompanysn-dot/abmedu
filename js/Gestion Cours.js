@@ -11,7 +11,8 @@ const SHEET_NAMES = {
     PROGRESSION: "Progression_Utilisateur",
     REPONSES_QUIZ: "Reponses_Quiz",
     CONFIG: "Config",
-    // NOUVEAU: ID de la feuille centrale pour trouver tous les cours
+    AVIS: "Avis_Utilisateurs", // NOUVEAU
+    // ID de la feuille centrale pour trouver tous les cours
     CENTRAL_SHEET_ID: "1xcW_lPim1AvD-RWDD0FtpAMYSrWq-FSv9XGa1ys2Xv4"
 };
 
@@ -36,6 +37,12 @@ function doGet(e) {
             case 'getProgressionCours':
                 // Retourne directement la réponse TextOutput
                 return createJsonResponse(getProgressionCours(userId, courseId), origin);
+            case 'getReviewsByUserId': // NOUVEAU
+                // Retourne directement la réponse TextOutput
+                return createJsonResponse(getReviewsByUserId(userId), origin);
+            case 'getReviewsByCourseId': // NOUVEAU
+                // Retourne directement la réponse TextOutput
+                return createJsonResponse(getReviewsByCourseId(courseId), origin);
             case 'getSeniorDashboardData': // NOUVEAU
                 // Retourne directement la réponse TextOutput
                 return createJsonResponse(getSeniorDashboardData(e.parameter.formateurNom), origin);
@@ -64,6 +71,12 @@ function doPost(e) {
             case 'enregistrerReponseQuiz':
                 // Retourne directement la réponse TextOutput
                 return createJsonResponse(enregistrerReponseQuiz(data), origin);
+            case 'submitReview': // NOUVEAU
+                // Retourne directement la réponse TextOutput
+                return createJsonResponse(submitReview(data), origin);
+            case 'submitReviewReply': // NOUVEAU
+                // Retourne directement la réponse TextOutput
+                return createJsonResponse(submitReviewReply(data), origin);
             default:
                 return createJsonResponse({ success: false, error: "Action POST non reconnue." }, origin);
         }
@@ -127,6 +140,98 @@ function getCoursAchetes(userId) {
         .map(row => row[headers.indexOf("ID_Cours")]);
 
     return { success: true, data: [...new Set(coursIds)] }; // Retourne les ID de cours uniques
+}
+
+/**
+ * NOUVEAU: Enregistre un nouvel avis pour un cours.
+ */
+function submitReview(data) {
+    const { userId, courseId, courseName, rating, comment } = data;
+    if (!userId || !courseId || !rating || !comment) {
+        return { success: false, error: "Données d'avis incomplètes." };
+    }
+
+    try {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.AVIS);
+        const reviewId = `AVIS-${new Date().getTime()}`;
+        sheet.appendRow([reviewId, userId, courseId, courseName, rating, comment, new Date(), '', '']); // Ajouter des colonnes vides pour la réponse
+        return { success: true, message: "Avis enregistré avec succès." };
+    } catch (error) {
+        return { success: false, error: `Erreur lors de l'enregistrement de l'avis: ${error.message}` };
+    }
+}
+
+/**
+ * NOUVEAU: Récupère tous les avis laissés par un utilisateur.
+ */
+function getReviewsByUserId(userId) {
+    if (!userId) return { success: false, error: "ID utilisateur manquant." };
+
+    try {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.AVIS);
+        const allData = sheet.getDataRange().getValues();
+        const headers = allData.shift();
+        const userIdIndex = headers.indexOf("ID_Client");
+
+        const userReviews = allData
+            .filter(row => row[userIdIndex] === userId)
+            .map(row => headers.reduce((obj, header, index) => (obj[header] = row[index], obj), {}))
+            .reverse(); // Les plus récents en premier
+
+        return { success: true, data: userReviews };
+    } catch (error) {
+        return { success: false, error: `Erreur lors de la récupération des avis: ${error.message}` };
+    }
+}
+
+/**
+ * NOUVEAU: Récupère tous les avis pour un cours spécifique.
+ */
+function getReviewsByCourseId(courseId) {
+    if (!courseId) return { success: false, error: "ID de cours manquant." };
+
+    try {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.AVIS);
+        const allData = sheet.getDataRange().getValues();
+        const headers = allData.shift();
+        const courseIdIndex = headers.indexOf("ID_Cours");
+
+        const courseReviews = allData
+            .filter(row => row[courseIdIndex] === courseId)
+            .map(row => headers.reduce((obj, header, index) => (obj[header] = row[index], obj), {}))
+            .reverse(); // Les plus récents en premier
+
+        return { success: true, data: courseReviews };
+    } catch (error) {
+        return { success: false, error: `Erreur lors de la récupération des avis: ${error.message}` };
+    }
+}
+
+/**
+ * NOUVEAU: Enregistre la réponse d'un formateur à un avis.
+ */
+function submitReviewReply(data) {
+    const { reviewId, replyText, formateurNom } = data;
+    if (!reviewId || !replyText || !formateurNom) {
+        return { success: false, error: "Données de réponse incomplètes." };
+    }
+
+    try {
+        const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.AVIS);
+        const allData = sheet.getDataRange().getValues();
+        const reviewIdIndex = allData[0].indexOf("ID_Avis");
+        const replyTextIndex = allData[0].indexOf("Reponse_Formateur");
+        const replyDateIndex = allData[0].indexOf("Date_Reponse");
+
+        const rowIndex = allData.findIndex(row => row[reviewIdIndex] === reviewId);
+        if (rowIndex === -1) return { success: false, error: "Avis non trouvé." };
+
+        sheet.getRange(rowIndex + 1, replyTextIndex + 1).setValue(replyText);
+        sheet.getRange(rowIndex + 1, replyDateIndex + 1).setValue(new Date());
+        return { success: true, message: "Réponse enregistrée." };
+    } catch (error) {
+        return { success: false, error: `Erreur lors de l'enregistrement de la réponse: ${error.message}` };
+    }
 }
 
 /**
@@ -311,6 +416,7 @@ function setupProject() {
     [SHEET_NAMES.COURS_ACHETES]: ["ID_Achat", "ID_Client", "ID_Cours", "Nom_Cours", "Prix_Achat", "Formateur_Nom", "Date_Achat"],
     [SHEET_NAMES.PROGRESSION]: ["ID_Progression", "ID_Client", "ID_Element", "Type_Element", "Statut", "Date_Completion"], // ID_Element peut être un ID de chapitre ou de module
     [SHEET_NAMES.REPONSES_QUIZ]: ["ID_Reponse", "ID_Client", "ID_Question", "Reponse_Donnee", "Est_Correcte", "Timestamp"],
+    [SHEET_NAMES.AVIS]: ["ID_Avis", "ID_Client", "ID_Cours", "Nom_Cours", "Note", "Commentaire", "Date_Avis", "Reponse_Formateur", "Date_Reponse"], // MODIFIÉ
     [SHEET_NAMES.CONFIG]: ["Clé", "Valeur"]
   };
 
