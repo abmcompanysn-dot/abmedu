@@ -1652,26 +1652,34 @@ function renderProductCard(course) {
   };
 
   return `
-  <a href="produit.html?id=${courseId}" class="product-card bg-white rounded-lg shadow-md overflow-hidden block group">
+  <div class="product-card bg-white rounded-lg shadow-md overflow-hidden block group">
+      <a href="produit.html?id=${courseId}" class="block">
+          <div class="relative">
+              <div class="h-40 bg-gray-200">
+                  <img src="${coverImage}" alt="${courseName}" class="h-full w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='${CONFIG.DEFAULT_PRODUCT_IMAGE}';">
+              </div>
+              <!-- NOUVEAU: Bouton Like -->
+              <button onclick="toggleLike(event, this)" class="like-btn absolute top-2 right-2 bg-white/70 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-500">
+                  <i class="far fa-heart"></i>
+              </button>
+          </div>
+      </a>
       <div class="relative">
-          <div class="h-40 bg-gray-200">
-              <img src="${coverImage}" alt="${courseName}" class="h-full w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='${CONFIG.DEFAULT_PRODUCT_IMAGE}';">
-          </div>
+          <a href="produit.html?id=${courseId}" class="block p-4">
+              <h3 class="font-bold text-gray-800 text-md h-12 overflow-hidden">${courseName}</h3>
+              <div class="flex items-center mt-3">
+                  <img src="${instructorImage}" alt="${instructorName}" class="w-6 h-6 rounded-full mr-2">
+                  <p class="text-xs text-gray-600 truncate">${instructorName}</p>
+              </div>
+              <div class="flex items-center mt-2">
+                  <span class="text-sm font-bold text-yellow-500 mr-1">${rating.toFixed(1)}</span>
+                  <div class="flex items-center mr-2">${renderStars(rating)}</div>
+                  <span class="text-xs text-gray-500">(${reviewsCount.toLocaleString('fr-FR')})</span>
+              </div>
+              <p class="font-extrabold text-lg mt-2 text-gray-900">${price.toLocaleString('fr-FR')} F CFA</p>
+          </a>
       </div>
-      <div class="p-4">
-          <h3 class="font-bold text-gray-800 text-md h-12 overflow-hidden">${courseName}</h3>
-          <div class="flex items-center mt-3">
-              <img src="${instructorImage}" alt="${instructorName}" class="w-6 h-6 rounded-full mr-2">
-              <p class="text-xs text-gray-600 truncate">${instructorName}</p>
-          </div>
-          <div class="flex items-center mt-2">
-              <span class="text-sm font-bold text-yellow-500 mr-1">${rating.toFixed(1)}</span>
-              <div class="flex items-center mr-2">${renderStars(rating)}</div>
-              <span class="text-xs text-gray-500">(${reviewsCount.toLocaleString('fr-FR')})</span>
-          </div>
-          <p class="font-extrabold text-lg mt-2 text-gray-900">${price.toLocaleString('fr-FR')} F CFA</p>
-      </div>
-  </a>
+  </div>
   `;
 }
 
@@ -1679,6 +1687,26 @@ function renderProductCard(course) {
  * NOUVEAU: Copie le lien du produit dans le presse-papiers et affiche une notification.
  * @param {Event} event 
  * @param {string} productId 
+ */
+/**
+ * NOUVEAU: Gère l'animation de "like" sur un cours.
+ * @param {Event} event L'événement du clic.
+ * @param {HTMLElement} button L'élément bouton qui a été cliqué.
+ */
+function toggleLike(event, button) {
+    // Empêche le clic de déclencher la navigation vers la page produit.
+    event.preventDefault();
+    event.stopPropagation();
+
+    button.classList.toggle('liked');
+    const icon = button.querySelector('i');
+    icon.classList.toggle('far'); // 'far' est pour l'icône vide
+    icon.classList.toggle('fas'); // 'fas' est pour l'icône pleine
+}
+/**
+ * NOUVEAU: Copie le lien du produit dans le presse-papiers et affiche une notification.
+ * @param {Event} event 
+ * @param {string} productId
  */
 async function shareProduct(event, productId) {
     event.preventDefault();

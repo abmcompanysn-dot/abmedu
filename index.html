@@ -145,6 +145,27 @@
         .floating-icon-bar:hover {
             opacity: 1 !important; /* Garder l'opacité au survol */
         }
+        /* NOUVEAU: Styles pour le bouton "like" */
+        .like-btn {
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+        .like-btn:hover {
+            transform: scale(1.1);
+        }
+        .like-btn.liked {
+            color: #ef4444; /* red-500 */
+            animation: like-pop 0.4s ease;
+        }
+        @keyframes like-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        /* Assurer que le conteneur de la carte est relatif pour positionner le bouton like */
+        .product-card {
+            position: relative;
+        }
+
         /* Style pour l'affichage décalé des produits sur mobile */
     </style>
 </head>
