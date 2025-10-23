@@ -2762,6 +2762,10 @@ function initializeAccountPage() {
     loadMyCourses(user.IDClient);
     loadUserActivityLog(user.IDClient);
     // La fonction pour charger les notifications sera appelée par initializeNotificationPage si besoin
+    loadMyCertificates(user.IDClient, user); // NOUVEAU: Passer l'objet user
+    loadAllCoursesForAccountPage(); // NOUVEAU
+    initializeProfileForm(user); // NOUVEAU
+    document.getElementById('profile-update-form')?.addEventListener('submit', handleProfileUpdate);
     initializeNotificationPage();
 }
 
@@ -2776,7 +2780,7 @@ function switchAccountTab(tabId) {
     document.querySelectorAll('.account-tab').forEach(el => el.classList.remove('active'));
 
     // Afficher le contenu et activer l'onglet sélectionné
-    document.getElementById(`content-${tabId}`).classList.remove('hidden');
+    document.getElementById(`content-${tabId}`)?.classList.remove('hidden');
     document.getElementById(`tab-${tabId}`).classList.add('active');
 }
 
@@ -2839,6 +2843,172 @@ async function loadMyCourses(userId) {
     } catch (error) {
         console.error("Erreur lors du chargement des cours de l'utilisateur:", error);
         if (container) container.innerHTML = '<p class="text-red-500 text-center">Une erreur est survenue lors du chargement de vos cours.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Charge et affiche les certificats pour les cours terminés.
+ * @param {string} userId - L'ID de l'utilisateur.
+ * @param {object} user - L'objet utilisateur complet.
+ */
+async function loadMyCertificates(userId, user) {
+    const container = document.getElementById('my-certificates-list');
+    if (!container) return;
+    container.innerHTML = '<p class="text-gray-500 text-center">Vérification de vos cours terminés...</p>';
+
+    try {
+        const [purchasedResponse, progressResponse, catalog] = await Promise.all([
+            fetch(`${CONFIG.COURSE_API_URL}?action=getCoursAchetes&userId=${userId}`),
+            fetch(`${CONFIG.COURSE_API_URL}?action=getAllUserProgress&userId=${userId}`),
+            getCatalogAndRefreshInBackground()
+        ]);
+
+        const purchasedResult = await purchasedResponse.json();
+        const progressResult = await progressResponse.json();
+
+        if (!purchasedResult.success || !progressResult.success) {
+            throw new Error("Impossible de charger les données de progression.");
+        }
+
+        const purchasedCourseIds = purchasedResult.data;
+        const completedElements = progressResult.data.completedElements || [];
+        const allCoursesDetails = catalog.data.products;
+
+        const myCourses = allCoursesDetails.filter(course => purchasedCourseIds.includes(course.ID_Cours));
+
+        const completedCourses = myCourses.filter(course => {
+            const totalChapters = course.modules.reduce((sum, mod) => sum + (mod.chapitres ? mod.chapitres.length : 0), 0);
+            if (totalChapters === 0) return false; // Ne peut pas être complété s'il n'y a pas de chapitres
+
+            const completedChaptersCount = course.modules.reduce((sum, mod) => {
+                return sum + (mod.chapitres ? mod.chapitres.filter(chap => completedElements.includes(chap.ID_Chapitre)).length : 0);
+            }, 0);
+            
+            return completedChaptersCount === totalChapters;
+        });
+
+        if (completedCourses.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 text-center">Vous n\'avez pas encore terminé de cours. Continuez vos efforts !</p>';
+            return;
+        }
+
+        const certificatesHTML = completedCourses.map(course => `
+            <div class="border rounded-lg p-4 flex items-center justify-between gap-4">
+                <div class="flex-grow">
+                    <h4 class="font-bold">${course.Nom_Cours}</h4>
+                    <p class="text-sm text-green-600 font-semibold">Terminé !</p>
+                </div>
+                <button onclick="generateCertificatePDF('${user.Nom}', '${course.Nom_Cours}')" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Télécharger</span>
+                </button>
+            </div>
+        `).join('');
+        container.innerHTML = certificatesHTML;
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des certificats:", error);
+        container.innerHTML = '<p class="text-red-500 text-center">Une erreur est survenue lors du chargement de vos certificats.</p>';
+    }
+}
+
+/**
+ * NOUVEAU: Génère un certificat en PDF et lance le téléchargement.
+ * @param {string} studentName - Le nom de l'étudiant.
+ * @param {string} courseName - Le nom du cours.
+ */
+function generateCertificatePDF(studentName, courseName) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    // --- Arrière-plan et bordure ---
+    doc.setFillColor(245, 245, 245); // #F5F5F5
+    doc.rect(0, 0, 297, 210, 'F');
+    doc.setDrawColor(26, 35, 58); // #1A233A
+    doc.setLineWidth(1.5);
+    doc.rect(10, 10, 277, 190);
+
+    // --- Logo ---
+    // Le logo doit être accessible via CORS. postimg.cc fonctionne bien.
+    const logoUrl = 'https://i.postimg.cc/X3zY8dfN/cree-oi-un-logo-fiuturiste-de-ABMedu-un-eplatforme-de-ellernnig-la-couleur-est-le-degrader-bleu-mari.jpg';
+    // Note: l'ajout d'image est asynchrone dans les versions récentes de jsPDF
+    // Pour simplifier, nous allons le faire de manière synchrone (peut être bloquant si l'image est grosse)
+    // Dans une application de production, il faudrait gérer cela avec des Promises.
+    // Pour ce cas, nous allons supposer que l'image est petite et que le blocage est acceptable.
+    // Pour une meilleure approche, il faudrait convertir l'image en base64 à l'avance.
+    // doc.addImage(logoUrl, 'PNG', 138.5, 20, 20, 20); // Centré
+
+    // --- Titres ---
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(36);
+    doc.setTextColor(255, 127, 0); // #FF7F00
+    doc.text('CERTIFICAT DE RÉUSSITE', 148.5, 60, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(16);
+    doc.setTextColor(26, 35, 58); // #1A233A
+    doc.text('Ce certificat est fièrement décerné à', 148.5, 80, { align: 'center' });
+
+    // --- Nom de l'étudiant ---
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(28);
+    doc.text(studentName, 148.5, 100, { align: 'center' });
+
+    // --- Texte de complétion ---
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(16);
+    doc.text('pour avoir terminé avec succès la formation', 148.5, 120, { align: 'center' });
+
+    // --- Nom du cours ---
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(255, 127, 0);
+    doc.text(courseName, 148.5, 135, { align: 'center' });
+
+    // --- Date et Signature ---
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 35, 58);
+    const today = new Date().toLocaleDateString('fr-FR');
+    doc.text(`Délivré le ${today}`, 70, 170, { align: 'center' });
+    doc.line(40, 165, 100, 165); // Ligne de signature
+    doc.text('Date', 70, 175, { align: 'center' });
+
+    doc.text('Le Formateur', 227, 170, { align: 'center' });
+    doc.line(197, 165, 257, 165); // Ligne de signature
+    doc.text('Signature', 227, 175, { align: 'center' });
+
+    // --- Téléchargement ---
+    doc.save(`Certificat_${courseName.replace(/ /g, '_')}_${studentName.replace(/ /g, '_')}.pdf`);
+    showToast("Téléchargement du certificat en cours...", false);
+}
+
+/**
+ * NOUVEAU: Charge et affiche tous les cours disponibles dans l'onglet "Explorer" de la page compte.
+ */
+async function loadAllCoursesForAccountPage() {
+    const container = document.getElementById('explore-courses-list');
+    if (!container) return;
+
+    const skeletonCard = `<div class="bg-white rounded-lg shadow overflow-hidden animate-pulse"><div class="bg-gray-200 h-40"></div><div class="p-3 space-y-2"><div class="bg-gray-200 h-4 rounded"></div><div class="bg-gray-200 h-6 w-1/2 rounded"></div></div></div>`;
+    container.innerHTML = Array(6).fill(skeletonCard).join('');
+
+    try {
+        const catalog = await getCatalogAndRefreshInBackground();
+        const allProducts = catalog.data.products || [];
+
+        if (allProducts.length === 0) {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-500">Aucun cours disponible pour le moment.</p>';
+            return;
+        }
+        container.innerHTML = allProducts.map(course => renderProductCard(course)).join('');
+    } catch (error) {
+        console.error("Erreur lors du chargement de tous les cours:", error);
+        container.innerHTML = '<p class="col-span-full text-center text-red-500">Impossible de charger le catalogue des cours.</p>';
     }
 }
 

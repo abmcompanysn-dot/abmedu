@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Compte - Junior Senior Gaps Killer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NOUVEAU: Ajout de jsPDF pour la génération de certificats -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
          :root {
@@ -117,8 +119,17 @@
                         <a href="#" onclick="switchAccountTab('notifications')" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
                             <span>Notifications</span>
                         </a>
-                        <a href="#" class="flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
-                            <span>Détails du compte</span>
+                        <!-- Onglet Certificats -->
+                        <a href="#" onclick="switchAccountTab('certificates')" id="tab-certificates" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
+                            <span>Mes Certificats</span>
+                        </a>
+                        <!-- NOUVEAU: Onglet Explorer les cours -->
+                        <a href="#" onclick="switchAccountTab('explore')" id="tab-explore" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
+                            <span>Explorer les cours</span>
+                        </a>
+                        <!-- NOUVEAU: Onglet Modifier le profil -->
+                        <a href="#" onclick="switchAccountTab('profile')" id="tab-profile" class="account-tab flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg">
+                            <span>Modifier mon profil</span>
                         </a>
                         <a href="#" id="logout-nav-link" class="flex items-center space-x-3 p-3 text-red-600 hover:bg-red-50 rounded-lg">
                             <span>Se déconnecter</span>
@@ -151,6 +162,42 @@
                 <!-- NOUVEAU: Contenu pour l'activité du compte -->
                 <div id="content-activity" class="account-content bg-white p-8 rounded-lg shadow hidden">
                     <div id="activity-log-section"></div>
+                </div>
+
+                <!-- Contenu pour les certificats -->
+                <div id="content-certificates" class="account-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Mes Certificats</h3>
+                    <div id="my-certificates-list" class="space-y-4"></div>
+                </div>
+
+                <!-- NOUVEAU: Contenu pour explorer les cours -->
+                <div id="content-explore" class="account-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Explorer tous nos cours</h3>
+                    <div id="explore-courses-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Les cours seront injectés ici -->
+                    </div>
+                </div>
+
+                <!-- NOUVEAU: Contenu pour modifier le profil -->
+                <div id="content-profile" class="account-content bg-white p-8 rounded-lg shadow hidden">
+                    <h3 class="text-xl font-bold mb-6">Modifier mon profil</h3>
+                    <form id="profile-update-form" class="space-y-6">
+                        <div>
+                            <label for="profile-name-input" class="block text-sm font-medium text-gray-700">Nom complet</label>
+                            <input type="text" id="profile-name-input" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gold focus:border-gold">
+                        </div>
+                        <div>
+                            <label for="profile-title-input" class="block text-sm font-medium text-gray-700">Titre / Profession</label>
+                            <input type="text" id="profile-title-input" placeholder="Ex: Étudiant en Marketing, Développeur Web" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gold focus:border-gold">
+                        </div>
+                        <div>
+                            <label for="profile-bio-input" class="block text-sm font-medium text-gray-700">Biographie</label>
+                            <textarea id="profile-bio-input" rows="3" placeholder="Parlez un peu de vous..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gold focus:border-gold"></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-gold text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition">Enregistrer les modifications</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
